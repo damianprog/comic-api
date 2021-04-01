@@ -14,7 +14,7 @@ const typeDefs = gql`
     token: String!
   }
 
-  input SignUpInput {
+  input SignupInput {
     nickname: String!
     email: String!
     password: String!
@@ -52,9 +52,10 @@ const typeDefs = gql`
   }
 
   type Mutation {
-    signUp(signUpInput: SignUpInput): AuthResponse!
-    signIn(email: String!, password: String!): AuthResponse!
+    signup(signupInput: SignupInput): AuthResponse!
+    signin(email: String!, password: String!): AuthResponse!
     createComic(input: NewComicInput!): Comic!
+    signout: Boolean
   }
 `;
 

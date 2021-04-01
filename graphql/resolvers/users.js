@@ -3,8 +3,8 @@ const jwt = require('jsonwebtoken');
 const { UserInputError } = require('apollo-server-express');
 
 const {
-  validateSignUpInput,
-  validateSignInInput,
+  validateSignupInput,
+  validateSigninInput,
 } = require('../../utils/validators');
 const JWT_SECRET = require('../../config');
 const { User } = require('../../models');
@@ -30,8 +30,8 @@ module.exports = {
     },
   },
   Mutation: {
-    async signIn(_, { email, password }, { res }) {
-      const { errors, valid } = validateSignInInput(email, password);
+    async signin(_, { email, password }, { res }) {
+      const { errors, valid } = validateSigninInput(email, password);
       const user = await User.findOne({ where: { email } });
 
       if (!valid) {
@@ -61,9 +61,9 @@ module.exports = {
         token,
       };
     },
-    async signUp(_, { signUpInput: { nickname, email, password, birthDate } }) {
+    async signup(_, { signupInput: { nickname, email, password, birthDate } }) {
       // Validate user data
-      const { valid, errors } = validateSignUpInput(
+      const { valid, errors } = validateSignupInput(
         nickname,
         email,
         password,
@@ -101,6 +101,13 @@ module.exports = {
         user,
         token,
       };
+    },
+    async signout(_, __, { res }) {
+      res.cookie('authToken', '', {
+        httpOnly: true,
+      });
+
+      return true;
     },
   },
 };

@@ -1,4 +1,4 @@
-module.exports.validateSignUpInput = (nickname, email, password, birthDate) => {
+module.exports.validateSignupInput = (nickname, email, password, birthDate) => {
   const errors = {};
   if (nickname.trim() === '') {
     errors.nickname = 'Nickname must not be empty';
@@ -24,7 +24,7 @@ module.exports.validateSignUpInput = (nickname, email, password, birthDate) => {
   };
 };
 
-module.exports.validateSignInInput = (email, password) => {
+module.exports.validateSigninInput = (email, password) => {
   const errors = {};
   if (email.trim() === '') {
     errors.email = 'Email must not be empty';
