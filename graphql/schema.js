@@ -5,9 +5,13 @@ const typeDefs = gql`
     id: ID!
     nickname: String!
     email: String!
-    token: String!
     birthDate: String!
     createdAt: String!
+  }
+
+  type AuthResponse {
+    user: User!
+    token: String!
   }
 
   input SignUpInput {
@@ -43,12 +47,13 @@ const typeDefs = gql`
   }
 
   type Query {
+    currentUser: User
     comics: [Comic]
   }
 
   type Mutation {
-    signUp(signUpInput: SignUpInput): User!
-    signIn(email: String!, password: String!): User!
+    signUp(signUpInput: SignUpInput): AuthResponse!
+    signIn(email: String!, password: String!): AuthResponse!
     createComic(input: NewComicInput!): Comic!
   }
 `;

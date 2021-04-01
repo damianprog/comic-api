@@ -1,12 +1,12 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { UserInputError } = require('apollo-server');
+const { UserInputError } = require('apollo-server-express');
 
 const {
   validateSignUpInput,
   validateSignInInput,
 } = require('../../utils/validators');
-const { JWT_KEY } = require('../../config');
+const JWT_SECRET = require('../../config');
 const { User } = require('../../models');
 
 function generateToken(user) {
@@ -15,14 +15,22 @@ function generateToken(user) {
       id: user.id,
       email: user.email,
     },
-    JWT_KEY,
-    { expiresIn: '1h' }
+    JWT_SECRET,
+    { expiresIn: '7d' }
   );
 }
 
 module.exports = {
+  Query: {
+    async currentUser(_, args, { user }) {
+      if (user) {
+        return await User.findOne({ where: { id: user.id } });
+      }
+      throw new Error("Sorry, you're not an authenticated user!");
+    },
+  },
   Mutation: {
-    async signIn(_, { email, password }) {
+    async signIn(_, { email, password }, { res }) {
       const { errors, valid } = validateSignInInput(email, password);
       const user = await User.findOne({ where: { email } });
 
@@ -43,8 +51,13 @@ module.exports = {
 
       const token = generateToken(user);
 
+      res.cookie('authToken', token, {
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60 * 24 * 7,
+      });
+
       return {
-        ...user.dataValues,
+        user,
         token,
       };
     },
@@ -85,7 +98,7 @@ module.exports = {
       const token = generateToken(newUser);
 
       return {
-        ...newUser.dataValues,
+        user,
         token,
       };
     },
