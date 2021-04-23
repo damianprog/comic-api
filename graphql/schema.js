@@ -7,11 +7,23 @@ const typeDefs = gql`
     email: String!
     birthDate: String!
     createdAt: String!
+    userDetails: UserDetails
   }
 
-  type AuthResponse {
-    user: User!
-    token: String!
+  type UserDetails {
+    id: ID!
+    about: String
+    interests: String
+    profileImageUrl: String
+    backgroundImageUrl: String
+  }
+
+  input UpdateUserInput {
+    nickname: String
+    about: String
+    interests: String
+    profileImageBase64: String
+    backgroundImageBase64: String
   }
 
   input SignupInput {
@@ -22,7 +34,7 @@ const typeDefs = gql`
   }
 
   type Comic {
-    id: Int!
+    id: ID!
     marvelApiId: Int!
     title: String!
     coverImage: String
@@ -47,13 +59,15 @@ const typeDefs = gql`
   }
 
   type Query {
-    currentUser: User
-    comics: [Comic]
+    user(id: Int, nickname: String): User!
+    currentUser: User!
+    comics: [Comic!]
   }
 
   type Mutation {
-    signup(signupInput: SignupInput): AuthResponse!
-    signin(email: String!, password: String!): AuthResponse!
+    signup(signupInput: SignupInput): User!
+    signin(email: String!, password: String!): User!
+    updateUser(input: UpdateUserInput!): User
     createComic(input: NewComicInput!): Comic!
     signout: Boolean
   }
