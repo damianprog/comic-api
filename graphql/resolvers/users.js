@@ -10,8 +10,9 @@ const {
 } = require('../../utils/validators');
 const JWT_SECRET = require('../../config');
 const { User, UserDetails, StoredImage } = require('../../models');
+const { updateUserAction } = require('../actions/users-actions');
 
-function generateToken(user) {
+const generateToken = (user) => {
   return jwt.sign(
     {
       id: user.id,
@@ -20,18 +21,6 @@ function generateToken(user) {
     JWT_SECRET,
     { expiresIn: '7d' }
   );
-}
-
-const uploadImageToCloudinary = async (base64, preset) => {
-  try {
-    const uploadResponse = await cloudinary.uploader.upload(base64, {
-      upload_preset: preset,
-    });
-
-    return uploadResponse;
-  } catch (error) {
-    console.error(error);
-  }
 };
 
 module.exports = {
@@ -166,72 +155,14 @@ module.exports = {
       return newUser;
     },
 
-    async updateUser(
-      _,
-      {
-        input: {
-          nickname,
-          about,
-          interests,
-          profileImageBase64,
-          backgroundImageBase64,
-        },
-      },
-      { user }
-    ) {
+    async updateUser(_, { input }, { user }) {
       if (user) {
-        const signedUser = await User.findOne({
+        let signedUser = await User.findOne({
           where: { id: user.id },
           include: 'userDetails',
         });
 
-        signedUser.nickname = nickname;
-        signedUser.userDetails.about = about;
-        signedUser.userDetails.interests = interests;
-
-        await Promise.all(
-          [
-            { type: 'profile', base64: profileImageBase64 },
-            { type: 'background', base64: backgroundImageBase64 },
-          ].map(async ({ type, base64 }) => {
-            let newStoredImageId = 0;
-
-            if (base64) {
-              const uploadResponse = await uploadImageToCloudinary(
-                base64,
-                'users_images'
-              );
-
-              const newStoredImage = await StoredImage.create({
-                url: uploadResponse.url,
-                publicId: uploadResponse.public_id,
-              });
-
-              newStoredImageId = newStoredImage.id;
-            }
-
-            if (base64 || base64 === '') {
-              const storedImageId =
-                signedUser.userDetails[`${type}StoredImageId`];
-
-              const storedImage = await StoredImage.findOne({
-                where: { id: storedImageId },
-              });
-
-              if (storedImage) {
-                try {
-                  await cloudinary.uploader.destroy(storedImage.publicId);
-                } catch (error) {
-                  console.log(error);
-                }
-
-                await storedImage.destroy();
-              }
-
-              signedUser.userDetails[`${type}StoredImageId`] = newStoredImageId;
-            }
-          })
-        );
+        signedUser = await updateUserAction(signedUser, input);
 
         await signedUser.userDetails.save();
         await signedUser.save();
