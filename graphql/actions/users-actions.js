@@ -3,12 +3,13 @@ const {
   uploadImageToCloudinary,
   deleteImageFromCloudinary,
 } = require('../../utils/cloudinary');
-const { User, UserDetails, StoredImage } = require('../../models');
+const { User, UserDetails } = require('../../models');
 
 const updateUserImages = async (user, newUserImages) => {
   await Promise.all(
     newUserImages.map(async ({ type, base64 }) => {
-      let newStoredImageId = 0;
+      let newImage = '';
+      let newPublicId = '';
 
       if (base64) {
         const uploadResponse = await uploadImageToCloudinary(
@@ -16,28 +17,16 @@ const updateUserImages = async (user, newUserImages) => {
           'users_images'
         );
 
-        const newStoredImage = await StoredImage.create({
-          url: uploadResponse.url,
-          publicId: uploadResponse.public_id,
-        });
-
-        newStoredImageId = newStoredImage.id;
+        newImage = uploadResponse.url;
+        newPublicId = uploadResponse.public_id;
       }
 
-      if (base64 || base64 === '') {
-        const storedImageId = user.userDetails[`${type}StoredImageId`];
+      const oldImagePublicId = user.userDetails[`${type}ImagePublicId`];
 
-        const storedImage = await StoredImage.findOne({
-          where: { id: storedImageId },
-        });
+      await deleteImageFromCloudinary(oldImagePublicId);
 
-        if (storedImage) {
-          await deleteImageFromCloudinary(storedImage.publicId);
-          await storedImage.destroy();
-        }
-
-        user.userDetails[`${type}StoredImageId`] = newStoredImageId;
-      }
+      user.userDetails[`${type}Image`] = newImage;
+      user.userDetails[`${type}ImagePublicId`] = newPublicId;
     })
   );
 
@@ -52,10 +41,14 @@ const updateUserAction = async (
   user.userDetails.about = about;
   user.userDetails.interests = interests;
 
-  const userImages = [
+  let userImages = [
     { type: 'profile', base64: profileImageBase64 },
     { type: 'background', base64: backgroundImageBase64 },
   ];
+
+  userImages = userImages.filter(
+    (image) => typeof image.base64 !== 'undefined'
+  );
 
   user = updateUserImages(user, userImages);
 

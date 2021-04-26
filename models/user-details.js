@@ -14,13 +14,21 @@ module.exports = (sequelize, DataTypes) => {
   }
   UserDetails.init(
     {
-      profileStoredImageId: {
-        type: DataTypes.INTEGER,
-        defaultValue: 0,
+      profileImage: {
+        type: DataTypes.STRING,
+        defaultValue: '',
       },
-      backgroundStoredImageId: {
-        type: DataTypes.INTEGER,
-        defaultValue: 0,
+      backgroundImage: {
+        type: DataTypes.STRING,
+        defaultValue: '',
+      },
+      profileImagePublicId: {
+        type: DataTypes.STRING,
+        defaultValue: '',
+      },
+      backgroundImagePublicId: {
+        type: DataTypes.STRING,
+        defaultValue: '',
       },
       about: {
         type: DataTypes.STRING,

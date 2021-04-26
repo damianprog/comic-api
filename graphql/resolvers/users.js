@@ -9,7 +9,7 @@ const {
   validateSigninInput,
 } = require('../../utils/validators');
 const JWT_SECRET = require('../../config');
-const { User, UserDetails, StoredImage } = require('../../models');
+const { User, UserDetails } = require('../../models');
 const { updateUserAction } = require('../actions/users-actions');
 
 const generateToken = (user) => {
@@ -40,28 +40,7 @@ module.exports = {
         include: 'userDetails',
       });
 
-      if (foundUser) {
-        const {
-          profileStoredImageId,
-          backgroundStoredImageId,
-        } = foundUser.userDetails;
-
-        const profileStoredImage = await StoredImage.findOne({
-          where: { id: profileStoredImageId },
-        });
-        const backgroundStoredImage = await StoredImage.findOne({
-          where: { id: backgroundStoredImageId },
-        });
-
-        foundUser.userDetails.profileImage = profileStoredImage
-          ? profileStoredImage.url
-          : '';
-        foundUser.userDetails.backgroundImage = backgroundStoredImage
-          ? backgroundStoredImage.url
-          : '';
-
-        return foundUser;
-      }
+      if (foundUser) return foundUser;
 
       throw new UserInputError('User not found');
     },
