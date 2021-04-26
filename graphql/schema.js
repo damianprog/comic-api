@@ -14,8 +14,8 @@ const typeDefs = gql`
     id: ID!
     about: String
     interests: String
-    profileImageUrl: String
-    backgroundImageUrl: String
+    profileImage: String
+    backgroundImage: String
   }
 
   input UpdateUserInput {

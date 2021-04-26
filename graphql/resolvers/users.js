@@ -53,10 +53,10 @@ module.exports = {
           where: { id: backgroundStoredImageId },
         });
 
-        foundUser.userDetails.profileImageUrl = profileStoredImage
+        foundUser.userDetails.profileImage = profileStoredImage
           ? profileStoredImage.url
           : '';
-        foundUser.userDetails.backgroundImageUrl = backgroundStoredImage
+        foundUser.userDetails.backgroundImage = backgroundStoredImage
           ? backgroundStoredImage.url
           : '';
 
