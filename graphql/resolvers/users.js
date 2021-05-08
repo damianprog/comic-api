@@ -47,7 +47,6 @@ module.exports = {
     async currentUser(_, args, { user }) {
       if (user) {
         const test = await User.findOne({ where: { id: user.id } });
-        console.log('user: ', test);
         return test;
       }
       throw new Error("Sorry, you're not an authenticated user!");

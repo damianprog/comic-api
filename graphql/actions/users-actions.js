@@ -35,9 +35,17 @@ const updateUserImages = async (user, newUserImages) => {
 
 const updateUserAction = async (
   user,
-  { nickname, about, interests, profileImageBase64, backgroundImageBase64 }
+  {
+    nickname,
+    birthDate,
+    about,
+    interests,
+    profileImageBase64,
+    backgroundImageBase64,
+  }
 ) => {
   user.nickname = nickname;
+  user.birthDate = birthDate;
   user.userDetails.about = about;
   user.userDetails.interests = interests;
 
