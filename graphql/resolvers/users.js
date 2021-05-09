@@ -25,7 +25,7 @@ const generateToken = (user) => {
 
 module.exports = {
   Query: {
-    async user(_, { id, nickname }) {
+    async user(_, { where: { id, nickname } }) {
       const foundUser = await User.findOne({
         where: {
           [Op.or]: [

@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   UserComic.init(
     {
-      type: DataTypes.STRING,
+      category: DataTypes.STRING,
       comicId: DataTypes.INTEGER,
       userId: DataTypes.INTEGER,
     },

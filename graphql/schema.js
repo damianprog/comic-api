@@ -1,12 +1,6 @@
 const { gql } = require('apollo-server-express');
 
 const typeDefs = gql`
-  enum UserComicType {
-    FAVOURITE
-    READ
-    WANT_TO_READ
-  }
-
   type User {
     id: ID!
     nickname: String!
@@ -14,6 +8,16 @@ const typeDefs = gql`
     birthDate: String!
     createdAt: String!
     userDetails: UserDetails
+  }
+
+  input UserSearch {
+    id: Int
+    nickname: String
+  }
+
+  input ComicSearch {
+    id: Int
+    marvelApiId: Int
   }
 
   type UserDetails {
@@ -69,14 +73,15 @@ const typeDefs = gql`
     id: ID!
     userId: Int!
     comic: Comic!
-    type: UserComicType!
+    category: String
   }
 
   type Query {
-    user(id: Int, nickname: String): User!
+    user(where: UserSearch!): User
     currentUser: User!
-    comics: [Comic!]
-    userComics(userId: Int): [UserComic]
+    comic(where: ComicSearch!): Comic
+    userComics(userId: Int, comicId: Int): [UserComic]
+    userComicsCategories(userId: Int): [String]
   }
 
   type Mutation {
@@ -84,7 +89,7 @@ const typeDefs = gql`
     signin(email: String!, password: String!): User!
     updateUser(input: UpdateUserInput!): User
     createComic(input: NewComicInput!): Comic!
-    createUserComic(input: NewComicInput!, type: UserComicType!): UserComic
+    createUserComic(input: NewComicInput!, category: String!): UserComic
     signout: Boolean
   }
 `;
