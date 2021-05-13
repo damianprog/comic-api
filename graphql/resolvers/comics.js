@@ -4,20 +4,9 @@ const { Op } = require('sequelize');
 
 module.exports = {
   Query: {
-    async comic(_, { where: { id, marvelApiId } }) {
+    async comic(_, { id }) {
       try {
-        const comic = await Comic.findOne({
-          where: {
-            [Op.or]: [
-              {
-                id: id ? id : 0,
-              },
-              {
-                marvelApiId: marvelApiId ? marvelApiId : 0,
-              },
-            ],
-          },
-        });
+        const comic = await Comic.findOne({ where: { id } });
         return comic;
       } catch (err) {
         throw new Error(err);

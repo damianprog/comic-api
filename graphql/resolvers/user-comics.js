@@ -1,5 +1,5 @@
 const { Comic, UserComic, User } = require('../../models');
-const { setComicsInUserComics } = require('../actions/comics-actions');
+const { setComicInUserComic } = require('../actions/comics-actions');
 const { Op } = require('sequelize');
 
 module.exports = {
@@ -28,7 +28,9 @@ module.exports = {
         });
       }
 
-      const userComicsWithComics = setComicsInUserComics(userComics);
+      const userComicsWithComics = userComics.map((userComic) =>
+        setComicInUserComic(userComic)
+      );
 
       return userComicsWithComics;
     },
@@ -43,6 +45,8 @@ module.exports = {
       );
       const uniqueUserComicsCategories = [...new Set(allUserComicsCategories)];
 
+      uniqueUserComicsCategories.sort();
+
       return uniqueUserComicsCategories;
     },
   },
@@ -51,16 +55,14 @@ module.exports = {
     async createUserComic(_, { input, category }, { user }) {
       if (user) {
         try {
-          const { marvelApiId } = input;
-          let comic = await Comic.findOne({ where: { marvelApiId } });
+          const { id } = input;
+          let comic = await Comic.findOne({ where: { id } });
           if (!comic) {
             comic = await Comic.create(input);
           }
-
           let userComic = await UserComic.findOne({
             where: { comicId: comic.id, userId: user.id, category },
           });
-
           if (!userComic) {
             userComic = await UserComic.create({
               category,
@@ -68,10 +70,24 @@ module.exports = {
               userId: user.id,
             });
           }
-
           userComic.comic = comic;
-
           return userComic;
+        } catch (err) {
+          throw new Error(err);
+        }
+      }
+      throw new Error("Sorry, you're not an authenticated user!");
+    },
+    async deleteUserComic(_, { id }, { user }) {
+      if (user) {
+        try {
+          const deletedUserComic = await UserComic.findOne({ where: { id } });
+          deletedUserComic.destroy();
+
+          const deletedUserComicWithComic =
+            setComicInUserComic(deletedUserComic);
+
+          return deletedUserComicWithComic;
         } catch (err) {
           throw new Error(err);
         }

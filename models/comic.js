@@ -13,7 +13,11 @@ module.exports = (sequelize, DataTypes) => {
   }
   Comic.init(
     {
-      marvelApiId: DataTypes.INTEGER,
+      // marvelApiId: DataTypes.INTEGER,
+      id: {
+        type: DataTypes.STRING,
+        primaryKey: true,
+      },
       title: DataTypes.STRING,
       coverImage: DataTypes.TEXT,
       onsaleDate: DataTypes.DATE,

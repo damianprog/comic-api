@@ -8,24 +8,16 @@ const getComicsMap = (comics) => {
   return comicsByIds;
 };
 
-const setComicsInUserComics = async (userComics) => {
-  const comicsIds = userComics.map((userComic) => userComic.comicId);
+const setComicInUserComic = async (userComic) => {
+  const { comicId } = userComic;
 
-  const comics = await Comic.findAll({
-    where: { id: comicsIds },
-    raw: true,
-  });
+  const comic = await Comic.findOne({ where: { id: comicId } });
 
-  const comicsByIds = getComicsMap(comics);
+  userComic.comic = comic;
 
-  const userComicsWithComics = userComics.map((userComic) => ({
-    ...userComic,
-    comic: comicsByIds.get(userComic.comicId),
-  }));
-
-  return userComicsWithComics;
+  return userComic;
 };
 
 module.exports = {
-  setComicsInUserComics,
+  setComicInUserComic,
 };

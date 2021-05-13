@@ -15,11 +15,6 @@ const typeDefs = gql`
     nickname: String
   }
 
-  input ComicSearch {
-    id: Int
-    marvelApiId: Int
-  }
-
   type UserDetails {
     id: ID!
     about: String
@@ -45,7 +40,7 @@ const typeDefs = gql`
   }
 
   input NewComicInput {
-    marvelApiId: Int!
+    id: ID!
     title: String!
     coverImage: String
     onsaleDate: String
@@ -53,12 +48,11 @@ const typeDefs = gql`
     inker: String
     penciler: String
     description: String
-    seriesId: Int
+    seriesId: ID
   }
 
   type Comic {
     id: ID!
-    marvelApiId: Int!
     title: String!
     coverImage: String
     onsaleDate: String
@@ -66,7 +60,7 @@ const typeDefs = gql`
     inker: String
     penciler: String
     description: String
-    seriesId: Int
+    seriesId: ID
   }
 
   type UserComic {
@@ -79,9 +73,9 @@ const typeDefs = gql`
   type Query {
     user(where: UserSearch!): User
     currentUser: User!
-    comic(where: ComicSearch!): Comic
-    userComics(userId: Int, comicId: Int): [UserComic]
-    userComicsCategories(userId: Int): [String]
+    comic(id: ID): Comic
+    userComics(userId: ID, comicId: ID): [UserComic]
+    userComicsCategories(userId: ID): [String]
   }
 
   type Mutation {
@@ -90,6 +84,7 @@ const typeDefs = gql`
     updateUser(input: UpdateUserInput!): User
     createComic(input: NewComicInput!): Comic!
     createUserComic(input: NewComicInput!, category: String!): UserComic
+    deleteUserComic(id: ID): UserComic
     signout: Boolean
   }
 `;
