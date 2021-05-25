@@ -63,13 +63,15 @@ module.exports = {
           let userComic = await UserComic.findOne({
             where: { comicId: comic.id, userId: user.id, category },
           });
-          if (!userComic) {
-            userComic = await UserComic.create({
-              category,
-              comicId: comic.id,
-              userId: user.id,
-            });
-          }
+
+          if (userComic) throw new Error('Provided UserComic already exists.');
+
+          userComic = await UserComic.create({
+            category,
+            comicId: comic.id,
+            userId: user.id,
+          });
+
           userComic.comic = comic;
           return userComic;
         } catch (err) {

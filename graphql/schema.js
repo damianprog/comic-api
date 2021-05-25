@@ -11,7 +11,7 @@ const typeDefs = gql`
   }
 
   input UserSearch {
-    id: Int
+    id: ID
     nickname: String
   }
 
@@ -65,9 +65,10 @@ const typeDefs = gql`
 
   type UserComic {
     id: ID!
-    userId: Int!
+    userId: ID!
     comic: Comic!
     category: String
+    createdAt: String
   }
 
   type Query {
