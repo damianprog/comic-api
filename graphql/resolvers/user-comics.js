@@ -1,42 +1,41 @@
 const { Comic, UserComic, User } = require('../../models');
-const { setComicInUserComic } = require('../actions/comics-actions');
 const { Op } = require('sequelize');
 
 module.exports = {
   Query: {
-    async userComics(_, { userId, comicId }) {
+    async userComics(_, { userId, nickname, comicId }) {
       let userComics = [];
+      let foundUserId = userId;
 
-      if (userId && comicId) {
+      if (nickname) {
+        const user = await User.findOne({ where: { nickname } });
+        foundUserId = user ? user.id : foundUserId;
+      }
+
+      if (foundUserId && comicId) {
         userComics = await UserComic.findAll({
-          where: { userId, comicId },
-          raw: true,
+          where: { userId: foundUserId, comicId },
+          include: ['comic', 'user'],
         });
-      } else {
+      } else if (foundUserId) {
         userComics = await UserComic.findAll({
-          where: {
-            [Op.or]: [
-              {
-                userId: userId ? userId : 0,
-              },
-              {
-                comicId: comicId ? comicId : 0,
-              },
-            ],
-          },
-          raw: true,
+          where: { userId: foundUserId },
+          include: ['comic', 'user'],
         });
       }
 
-      const userComicsWithComics = userComics.map((userComic) =>
-        setComicInUserComic(userComic)
-      );
-
-      return userComicsWithComics;
+      return userComics;
     },
-    async userComicsCategories(_, { userId }) {
+    async userComicsCategories(_, { userId, nickname }) {
+      let foundUserId = userId;
+
+      if (nickname) {
+        const user = await User.findOne({ where: { nickname } });
+        foundUserId = user ? user.id : foundUserId;
+      }
+
       const userComics = await UserComic.findAll({
-        where: { userId },
+        where: { userId: foundUserId },
         raw: true,
       });
 

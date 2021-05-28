@@ -9,11 +9,11 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate({ User, UserComic }) {
       // define association here
+      this.hasMany(UserComic, { foreignKey: 'comicId', as: 'userComics' });
     }
   }
   Comic.init(
     {
-      // marvelApiId: DataTypes.INTEGER,
       id: {
         type: DataTypes.STRING,
         primaryKey: true,
@@ -29,6 +29,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
+      underscored: true,
       tableName: 'comics',
       modelName: 'Comic',
     }

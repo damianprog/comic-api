@@ -1,5 +1,4 @@
-const { Comic, UserComic, User } = require('../../models');
-const { setComicsInUserComics } = require('../actions/comics-actions');
+const { Comic } = require('../../models');
 const { Op } = require('sequelize');
 
 module.exports = {

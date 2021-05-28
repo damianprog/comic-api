@@ -65,7 +65,7 @@ const typeDefs = gql`
 
   type UserComic {
     id: ID!
-    userId: ID!
+    user: User!
     comic: Comic!
     category: String
     createdAt: String
@@ -75,8 +75,8 @@ const typeDefs = gql`
     user(where: UserSearch!): User
     currentUser: User!
     comic(id: ID): Comic
-    userComics(userId: ID, comicId: ID): [UserComic]
-    userComicsCategories(userId: ID): [String]
+    userComics(userId: ID, nickname: String, comicId: ID): [UserComic]
+    userComicsCategories(userId: ID, nickname: String): [String]
   }
 
   type Mutation {
