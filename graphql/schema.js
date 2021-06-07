@@ -71,21 +71,32 @@ const typeDefs = gql`
     createdAt: String
   }
 
+  type Review {
+    id: ID!
+    comic: Comic!
+    user: User!
+    text: String!
+    createdAt: String
+  }
+
   type Query {
     user(where: UserSearch!): User
     currentUser: User!
     comic(id: ID): Comic
     userComics(userId: ID, nickname: String, comicId: ID): [UserComic]
     userComicsCategories(userId: ID, nickname: String): [String]
+    reviews(userId: ID, comicId: ID): [Review]
   }
 
   type Mutation {
     signup(signupInput: SignupInput): User!
     signin(email: String!, password: String!): User!
-    updateUser(input: UpdateUserInput!): User
-    createComic(input: NewComicInput!): Comic!
-    createUserComic(input: NewComicInput!, category: String!): UserComic
+    updateUser(updateUserInput: UpdateUserInput!): User
+    createComic(newComicInput: NewComicInput!): Comic!
+    createUserComic(newComicInput: NewComicInput!, category: String!): UserComic
     deleteUserComic(id: ID): UserComic
+    createReview(newComicInput: NewComicInput!, text: String!): Review
+    updateReview(comicId: ID!, text: String!): Review
     signout: Boolean
   }
 `;

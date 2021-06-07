@@ -46,7 +46,10 @@ module.exports = {
     },
     async currentUser(_, args, { user }) {
       if (user) {
-        const test = await User.findOne({ where: { id: user.id } });
+        const test = await User.findOne({
+          where: { id: user.id },
+          include: 'userDetails',
+        });
         return test;
       }
       throw new Error("Sorry, you're not an authenticated user!");
@@ -55,7 +58,10 @@ module.exports = {
   Mutation: {
     async signin(_, { email, password }, { res }) {
       const { errors, valid } = validateSigninInput(email, password);
-      const user = await User.findOne({ where: { email } });
+      const user = await User.findOne({
+        where: { email },
+        include: 'userDetails',
+      });
 
       if (!valid) {
         throw new UserInputError('Errors', { errors });
@@ -121,7 +127,9 @@ module.exports = {
         birthDate,
       });
 
-      await UserDetails.create({ userId: newUser.id });
+      const userDetails = await UserDetails.create({ userId: newUser.id });
+
+      newUser.userDetails = userDetails;
 
       const token = generateToken(newUser);
 
@@ -133,14 +141,14 @@ module.exports = {
       return newUser;
     },
 
-    async updateUser(_, { input }, { user }) {
+    async updateUser(_, { updateUserInput }, { user }) {
       if (user) {
         let signedUser = await User.findOne({
           where: { id: user.id },
           include: 'userDetails',
         });
 
-        signedUser = await updateUserAction(signedUser, input);
+        signedUser = await updateUserAction(signedUser, updateUserInput);
 
         await signedUser.userDetails.save();
         await signedUser.save();

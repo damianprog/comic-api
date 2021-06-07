@@ -14,9 +14,9 @@ module.exports = {
   },
 
   Mutation: {
-    async createComic(_, { input }) {
+    async createComic(_, { newComicInput }) {
       try {
-        const comic = await Comic.create(input);
+        const comic = await Comic.create(newComicInput);
         return comic;
       } catch (err) {
         throw new Error(err);
