@@ -85,6 +85,7 @@ const typeDefs = gql`
     comic(id: ID): Comic
     userComics(userId: ID, nickname: String, comicId: ID): [UserComic]
     userComicsCategories(userId: ID, nickname: String): [String]
+    review(id: ID!): Review
     reviews(userId: ID, comicId: ID): [Review]
   }
 

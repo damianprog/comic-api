@@ -54,7 +54,7 @@ module.exports = {
       if (user) {
         try {
           const alreadyCreatedUserComic = await UserComic.findOne({
-            where: { comicId: comic.id, userId: user.id, category },
+            where: { comicId: newComicInput.id, userId: user.id, category },
           });
 
           if (alreadyCreatedUserComic)

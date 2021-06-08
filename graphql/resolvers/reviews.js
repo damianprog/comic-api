@@ -4,6 +4,14 @@ const { Op } = require('sequelize');
 
 module.exports = {
   Query: {
+    async review(_, { id }) {
+      const foundReview = await Review.findOne({
+        where: { id },
+        include: { all: true, nested: true },
+      });
+
+      return foundReview;
+    },
     async reviews(_, { userId, comicId }) {
       const foundReviews = await Review.findAll({
         where: {
