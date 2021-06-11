@@ -9,7 +9,7 @@ const {
   validateSigninInput,
 } = require('../../utils/validators');
 const JWT_SECRET = require('../../config');
-const { User, UserDetails } = require('../../models');
+const { User, UserDetails, Review, UserComic } = require('../../models');
 const { updateUserAction } = require('../actions/users-actions');
 
 const generateToken = (user) => {
@@ -24,6 +24,17 @@ const generateToken = (user) => {
 };
 
 module.exports = {
+  UserActivity: {
+    __resolveType(obj, context, info) {
+      if (obj.text) {
+        return 'Review';
+      }
+      if (obj.category) {
+        return 'UserComic';
+      }
+      return null; // GraphQLError is thrown
+    },
+  },
   Query: {
     async user(_, { where: { id, nickname } }) {
       const foundUser = await User.findOne({
@@ -46,13 +57,40 @@ module.exports = {
     },
     async currentUser(_, args, { user }) {
       if (user) {
-        const test = await User.findOne({
+        const signedUser = await User.findOne({
           where: { id: user.id },
           include: 'userDetails',
         });
-        return test;
+        return signedUser;
       }
       throw new Error("Sorry, you're not an authenticated user!");
+    },
+    async userActivity(_, { userId, first, lastCreatedAt = 0 }) {
+      const userReviews = await Review.findAll({
+        where: { userId },
+        include: ['comic', 'user'],
+      });
+      const userComics = await UserComic.findAll({
+        where: { userId },
+        include: ['comic', 'user'],
+      });
+
+      const sortedUserActivities = [...userReviews, ...userComics].sort(
+        (a, b) => parseInt(b.createdAt) - parseInt(a.createdAt)
+      );
+
+      const previousLastUserActivityIndex = sortedUserActivities.findIndex(
+        (userActivity) => +userActivity.createdAt === +lastCreatedAt
+      );
+
+      const currentFirstUserActivityIndex = previousLastUserActivityIndex + 1;
+
+      const userActivities = sortedUserActivities.slice(
+        currentFirstUserActivityIndex,
+        currentFirstUserActivityIndex + first
+      );
+
+      return userActivities;
     },
   },
   Mutation: {

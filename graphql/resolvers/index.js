@@ -4,6 +4,9 @@ const userComicsResolvers = require('./user-comics');
 const reviewsResolvers = require('./reviews');
 
 module.exports = {
+  UserActivity: {
+    ...usersResolvers.UserActivity,
+  },
   Query: {
     ...usersResolvers.Query,
     ...comicsResolvers.Query,

@@ -79,6 +79,8 @@ const typeDefs = gql`
     createdAt: String
   }
 
+  union UserActivity = UserComic | Review
+
   type Query {
     user(where: UserSearch!): User
     currentUser: User!
@@ -87,6 +89,7 @@ const typeDefs = gql`
     userComicsCategories(userId: ID, nickname: String): [String]
     review(id: ID!): Review
     reviews(userId: ID, comicId: ID): [Review]
+    userActivity(userId: ID, first: Int, lastCreatedAt: String): [UserActivity]
   }
 
   type Mutation {
