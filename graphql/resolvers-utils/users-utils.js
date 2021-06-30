@@ -33,7 +33,7 @@ const updateUserImages = async (user, newUserImages) => {
   return user;
 };
 
-const updateUserAction = async (
+const updateUserProperties = async (
   user,
   {
     nickname,
@@ -64,5 +64,5 @@ const updateUserAction = async (
 };
 
 module.exports = {
-  updateUserAction,
+  updateUserProperties,
 };

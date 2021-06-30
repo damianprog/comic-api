@@ -2,16 +2,16 @@ const comicsResolvers = require('./comics');
 const usersResolvers = require('./users');
 const userComicsResolvers = require('./user-comics');
 const reviewsResolvers = require('./reviews');
+const userActivities = require('./user-activities');
+const unions = require('./unions');
 
 module.exports = {
-  UserActivity: {
-    ...usersResolvers.UserActivity,
-  },
   Query: {
     ...usersResolvers.Query,
     ...comicsResolvers.Query,
     ...userComicsResolvers.Query,
     ...reviewsResolvers.Query,
+    ...userActivities.Query,
   },
   Mutation: {
     ...usersResolvers.Mutation,
@@ -19,4 +19,5 @@ module.exports = {
     ...userComicsResolvers.Mutation,
     ...reviewsResolvers.Mutation,
   },
+  ...unions,
 };

@@ -89,7 +89,11 @@ const typeDefs = gql`
     userComicsCategories(userId: ID, nickname: String): [String]
     review(id: ID!): Review
     reviews(userId: ID, comicId: ID): [Review]
-    userActivity(userId: ID, first: Int, lastCreatedAt: String): [UserActivity]
+    userActivities(
+      userId: ID
+      quantity: Int
+      lastActivityCreatedAt: String
+    ): [UserActivity]
   }
 
   type Mutation {
