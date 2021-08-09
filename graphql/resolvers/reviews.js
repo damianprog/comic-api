@@ -1,6 +1,7 @@
 const { UserInputError } = require('apollo-server-errors');
 const { Comic, Review } = require('../../models');
 const { Op } = require('sequelize');
+const { AuthenticationError } = require('apollo-server-express');
 
 module.exports = {
   Query: {
@@ -69,7 +70,7 @@ module.exports = {
         }
       }
 
-      throw new Error("Sorry, you're not an authenticated user!");
+      throw new AuthenticationError("Sorry, you're not an authenticated user!");
     },
     async updateReview(_, { comicId, text }, { user }) {
       if (user) {
@@ -89,7 +90,7 @@ module.exports = {
         return review;
       }
 
-      throw new Error("Sorry, you're not an authenticated user!");
+      throw new AuthenticationError("Sorry, you're not an authenticated user!");
     },
   },
 };

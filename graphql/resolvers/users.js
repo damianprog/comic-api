@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const { UserInputError } = require('apollo-server-express');
 const { cloudinary } = require('../../utils/cloudinary');
 const { Op } = require('sequelize');
+const { AuthenticationError } = require('apollo-server-express');
 
 const {
   validateSignupInput,
@@ -52,7 +53,7 @@ module.exports = {
         });
         return signedUser;
       }
-      throw new Error("Sorry, you're not an authenticated user!");
+      throw new AuthenticationError("Sorry, you're not an authenticated user!");
     },
   },
   Mutation: {
@@ -82,6 +83,8 @@ module.exports = {
 
       res.cookie('authToken', token, {
         httpOnly: true,
+        sameSite: 'none',
+        secure: true,
         maxAge: 1000 * 60 * 60 * 24 * 7,
       });
 
@@ -135,6 +138,8 @@ module.exports = {
 
       res.cookie('authToken', token, {
         httpOnly: true,
+        sameSite: 'none',
+        secure: true,
         maxAge: 1000 * 60 * 60 * 24 * 7,
       });
 
@@ -156,11 +161,13 @@ module.exports = {
         return signedUser;
       }
 
-      throw new Error("Sorry, you're not an authenticated user!");
+      throw new AuthenticationError("Sorry, you're not an authenticated user!");
     },
     async signout(_, __, { res }) {
       res.cookie('authToken', '', {
         httpOnly: true,
+        sameSite: 'none',
+        secure: true,
       });
 
       return true;

@@ -1,4 +1,5 @@
 const { Comic, UserComic, User } = require('../../models');
+const { AuthenticationError } = require('apollo-server-express');
 
 module.exports = {
   Query: {
@@ -83,7 +84,7 @@ module.exports = {
           throw new Error(err);
         }
       }
-      throw new Error("Sorry, you're not an authenticated user!");
+      throw new AuthenticationError("Sorry, you're not an authenticated user!");
     },
     async deleteUserComic(_, { id }, { user }) {
       if (user) {
@@ -100,7 +101,7 @@ module.exports = {
         }
       }
 
-      throw new Error("Sorry, you're not an authenticated user!");
+      throw new AuthenticationError("Sorry, you're not an authenticated user!");
     },
   },
 };

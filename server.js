@@ -31,11 +31,7 @@ const server = new ApolloServer({
     endpoint: '/graphql',
   },
   context: ({ req, res }) => {
-    const user = req.headers.user
-      ? JSON.parse(req.headers.user)
-      : req.user
-      ? req.user
-      : null;
+    const user = req.user ? req.user : null;
 
     return { user, res };
   },
