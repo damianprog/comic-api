@@ -1,5 +1,11 @@
 const { Comic, UserComic, User } = require('../../models');
-const { AuthenticationError } = require('apollo-server-express');
+const {
+  AuthenticationError,
+  UserInputError,
+} = require('apollo-server-express');
+const {
+  validateCreateUserComicInput,
+} = require('../../utils/validators/user-mutations-validators');
 
 module.exports = {
   Query: {
@@ -53,52 +59,55 @@ module.exports = {
   Mutation: {
     async createUserComic(_, { newComicInput, category }, { user }) {
       if (user) {
-        try {
-          const alreadyCreatedUserComic = await UserComic.findOne({
-            where: { comicId: newComicInput.id, userId: user.id, category },
-          });
+        const { valid, errors } = validateCreateUserComicInput({
+          ...newComicInput,
+          category,
+        });
 
-          if (alreadyCreatedUserComic)
-            throw new Error('Provided UserComic already exists.');
-
-          const { id } = newComicInput;
-          let comic = await Comic.findOne({ where: { id } });
-          if (!comic) {
-            comic = await Comic.create(newComicInput);
-          }
-
-          let newUserComic = await UserComic.create({
-            category,
-            comicId: comic.id,
-            userId: user.id,
-          });
-
-          // Finding just created userComic to get associated objects
-          newUserComic = await UserComic.findOne({
-            where: { id: newUserComic.id },
-            include: ['comic', 'user'],
-          });
-
-          return newUserComic;
-        } catch (err) {
-          throw new Error(err);
+        if (!valid) {
+          throw new UserInputError('Errors', errors);
         }
+
+        const alreadyCreatedUserComic = await UserComic.findOne({
+          where: { comicId: newComicInput.id, userId: user.id, category },
+        });
+
+        if (alreadyCreatedUserComic) {
+          const errors = { category: 'Comic is already in this category' };
+          throw new UserInputError('Errors', errors);
+        }
+
+        const { id } = newComicInput;
+        let comic = await Comic.findOne({ where: { id } });
+        if (!comic) {
+          comic = await Comic.create(newComicInput);
+        }
+
+        let newUserComic = await UserComic.create({
+          category,
+          comicId: comic.id,
+          userId: user.id,
+        });
+
+        // Finding just created userComic to get associated objects
+        newUserComic = await UserComic.findOne({
+          where: { id: newUserComic.id },
+          include: ['comic', 'user'],
+        });
+
+        return newUserComic;
       }
       throw new AuthenticationError("Sorry, you're not an authenticated user!");
     },
     async deleteUserComic(_, { id }, { user }) {
       if (user) {
-        try {
-          const deletedUserComic = await UserComic.findOne({
-            where: { id },
-            include: ['user', 'comic'],
-          });
-          deletedUserComic.destroy();
+        const deletedUserComic = await UserComic.findOne({
+          where: { id },
+          include: ['user', 'comic'],
+        });
+        deletedUserComic.destroy();
 
-          return deletedUserComic;
-        } catch (err) {
-          throw new Error(err);
-        }
+        return deletedUserComic;
       }
 
       throw new AuthenticationError("Sorry, you're not an authenticated user!");

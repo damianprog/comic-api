@@ -8,7 +8,8 @@ const { AuthenticationError } = require('apollo-server-express');
 const {
   validateSignupInput,
   validateSigninInput,
-} = require('../../utils/validators');
+  validateUpdateUserInput,
+} = require('../../utils/validators/user-mutations-validators');
 const JWT_SECRET = require('../../config');
 const { User, UserDetails } = require('../../models');
 const { updateUserProperties } = require('../resolvers-utils/users-utils');
@@ -58,25 +59,26 @@ module.exports = {
   },
   Mutation: {
     async signin(_, { email, password }, { res }) {
-      const { errors, valid } = validateSigninInput(email, password);
+      const { errors, valid } = validateSigninInput({ email, password });
+
+      if (!valid) {
+        throw new UserInputError('Errors', errors);
+      }
+
       const user = await User.findOne({
         where: { email },
         include: 'userDetails',
       });
 
-      if (!valid) {
-        throw new UserInputError('Errors', { errors });
-      }
-
       if (!user) {
         errors.general = 'User not found';
-        throw new UserInputError('User not found', { errors });
+        throw new UserInputError('User not found', errors);
       }
 
       const match = await bcrypt.compare(password, user.password);
       if (!match) {
         errors.general = 'Wrong credentials';
-        throw new UserInputError('Wrong credentials', { errors });
+        throw new UserInputError('Wrong credentials', errors);
       }
 
       const token = generateToken(user);
@@ -90,25 +92,15 @@ module.exports = {
 
       return user;
     },
-    async signup(
-      _,
-      { signupInput: { nickname, email, password, birthDate } },
-      { res }
-    ) {
-      // Validate user data
+    async signup(_, { signupInput }, { res }) {
+      const { nickname, email, password } = signupInput;
 
-      const { valid, errors } = validateSignupInput(
-        nickname,
-        email,
-        password,
-        birthDate
-      );
+      const { valid, errors } = validateSignupInput(signupInput);
 
       if (!valid) {
-        throw new UserInputError('Errors', { errors });
+        throw new UserInputError('Errors', errors);
       }
 
-      // Make sure user doesnt already exist
       const duplicateErrors = {};
 
       const userWithNickname = await User.findOne({ where: { nickname } });
@@ -118,16 +110,14 @@ module.exports = {
       if (userWithEmail) duplicateErrors.email = 'This email is taken';
 
       if (Object.keys(duplicateErrors).length > 0) {
-        throw new UserInputError('Errors', { errors: duplicateErrors });
+        throw new UserInputError('Errors', duplicateErrors);
       }
-      // hash password and create an auth token
-      password = await bcrypt.hash(password, 12);
+
+      const hashedPassword = await bcrypt.hash(password, 12);
 
       const newUser = await User.create({
-        nickname,
-        email,
-        password,
-        birthDate,
+        ...signupInput,
+        password: hashedPassword,
       });
 
       const userDetails = await UserDetails.create({ userId: newUser.id });
@@ -148,6 +138,12 @@ module.exports = {
 
     async updateUser(_, { updateUserInput }, { user }) {
       if (user) {
+        const { valid, errors } = validateUpdateUserInput(updateUserInput);
+
+        if (!valid) {
+          throw new UserInputError('Errors', errors);
+        }
+
         let signedUser = await User.findOne({
           where: { id: user.id },
           include: 'userDetails',
